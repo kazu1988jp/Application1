@@ -21,7 +21,7 @@ struct ListView: View {
             ScrollView{
                 
                 VStack{
-                    Text("123")
+                    Text("Location")
                     Text("\(latetude), \(longitude)").padding()
                 }
                 
