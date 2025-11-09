@@ -9,12 +9,14 @@ import SwiftUI
 
 struct ListView: View {
     
-    @ObservedObject var manager = LocationManager()
+    @StateObject var manager = LocationManager()
 
     var body: some View {
-        let latetude = $manager.location.wrappedValue.coordinate.latitude
-        let longitude = $manager.location.wrappedValue.coordinate.longitude
+//        let latetude = $manager.location.wrappedValue.coordinate.latitude
+//        let longitude = $manager.location.wrappedValue.coordinate.longitude
+        
 
+        
         
         NavigationView {
             
@@ -22,8 +24,9 @@ struct ListView: View {
                 
                 VStack{
                     Text("Location")
-                    Text("\(latetude), \(longitude)").padding()
-                }
+                    Text("\(manager.latitude), \(manager.longitude)").padding()
+                    
+                }.onAppear{ manager.manager.requestWhenInUseAuthorization()}
                 
             }.navigationTitle("List")
         }
@@ -31,6 +34,16 @@ struct ListView: View {
         
     }
 }
+
+//struct LocationList: View{
+//    @ObservedObject var manager = LocationManager()
+//    
+//    var body: some View{
+//        
+//        Text($manager.locationList.count)
+//    }
+//    
+//}
 
 #Preview {
     ListView()
