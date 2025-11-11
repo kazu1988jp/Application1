@@ -6,45 +6,48 @@
 //
 
 import SwiftUI
+import Charts
 
 struct ListView: View {
     
     @StateObject var manager = LocationManager()
 
     var body: some View {
-//        let latetude = $manager.location.wrappedValue.coordinate.latitude
-//        let longitude = $manager.location.wrappedValue.coordinate.longitude
-        
 
-        
-        
         NavigationView {
             
-            ScrollView{
+            List {
                 
-                VStack{
-                    Text("Location")
-                    Text("\(manager.latitude), \(manager.longitude)").padding()
-                    
-                }.onAppear{ manager.manager.requestWhenInUseAuthorization()}
-                
-            }.navigationTitle("List")
+                ForEach(manager.PointdataRecord) { entry in
+                    HStack {
+                        // entry.longitude と entry.latitude を直接参照
+                        Text("経度: \(entry.longitude, specifier: "%.6f")")
+                        Spacer() // 間隔を空ける
+                        Text("緯度: \(entry.latitude, specifier: "%.6f")")
+                    }
+                }
+            }
         }
-        
-        
     }
 }
 
-//struct LocationList: View{
-//    @ObservedObject var manager = LocationManager()
-//    
-//    var body: some View{
-//        
-//        Text($manager.locationList.count)
-//    }
-//    
-//}
+
+struct Graf:View {
+    @StateObject var manager = LocationManager()
+    
+    var body: some View {
+        Chart(manager.PointdataRecord) {
+
+            PointMark(
+                x: .value("Wing Length", $0.latitude),
+                y: .value("Wing Width", $0.longitude)
+            )
+        }
+    }
+}
+
 
 #Preview {
     ListView()
+    //Graf()
 }

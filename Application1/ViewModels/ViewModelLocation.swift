@@ -3,8 +3,11 @@ import MapKit
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     let manager = CLLocationManager()
     @Published var location = CLLocation()
-    @Published var latitude : Double = 1.0
-    @Published var longitude : Double = 1.0
+    @Published var latitude : Double = 0.0
+    @Published var longitude : Double = 0.0
+    @Published var latitudeRecord : [Double] = []
+    @Published var longitudeRecord : [Double] = []
+    @Published var PointdataRecord : [DataPoint] = []
     
     
     override init() {
@@ -13,8 +16,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         self.manager.delegate = self
         self.manager.requestWhenInUseAuthorization()
         self.manager.desiredAccuracy = kCLLocationAccuracyBest
-        self.manager.distanceFilter = 2
+        self.manager.distanceFilter = 0.1
         self.manager.startUpdatingLocation()
+
 
  
     }
@@ -24,7 +28,13 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         self.location = locations.last!
         latitude = location.coordinate.latitude
         longitude = location.coordinate.longitude
-
+        latitudeRecord.append(latitude)
+        longitudeRecord.append(longitude)
+        
+        let newPoint = DataPoint(latitude: latitude, longitude: longitude)
+        
+        PointdataRecord.append(newPoint)
+        
     }
     
 }
