@@ -5,8 +5,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var location = CLLocation()
     @Published var latitude : Double = 0.0
     @Published var longitude : Double = 0.0
-    @Published var latitudeRecord : [Double] = []
-    @Published var longitudeRecord : [Double] = []
     @Published var PointdataRecord : [DataPoint] = []
     
     
@@ -28,8 +26,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         self.location = locations.last!
         latitude = location.coordinate.latitude
         longitude = location.coordinate.longitude
-        latitudeRecord.append(latitude)
-        longitudeRecord.append(longitude)
         
         let newPoint = DataPoint(latitude: latitude, longitude: longitude)
         
