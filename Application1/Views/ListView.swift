@@ -10,7 +10,7 @@ import Charts
 
 struct ListView: View {
     
-    @ObservedObject var manager = LocationManager()
+    @ObservedObject var manager : LocationManager
 
     var body: some View {
 
@@ -34,13 +34,21 @@ struct ListView: View {
 
 struct Graf:View {
     @StateObject var manager = LocationManager()
+    @State var XCenter: Double = 0
+    @State var XRange: Double = 90.0
+    @State var YCenter: Double = 0
+    @State var YRange: Double = 180.0
+    @State var isSheet : Bool = false
     @State var Xmin: Double = -90.0
     @State var Xmax: Double = 90.0
     @State var Ymin: Double = -180.0
     @State var Ymax: Double = 180.0
-    @State var isSheet : Bool = false
+    
+    
     
     var body: some View {
+        
+        
         VStack{
             Chart(manager.PointdataRecord) {
                 PointMark(
@@ -54,23 +62,24 @@ struct Graf:View {
             .frame(width: 300, height: 300)
             
             HStack{
-                Text("Xmin").padding()
-                Slider(value: $Xmin, in:-90...Xmax ,step:0.1)
+                Text("XCenter").padding()
+                Slider(value: $XCenter, in:-90...90 ,step:0.1)
             }
             HStack{
-                Text("Xmax").padding()
-                Slider(value: $Xmax, in:Xmin...90 ,step:0.1)
+                Text("XRange").padding()
+                Slider(value: $XRange, in:0...180 ,step:0.1)
             }
             HStack{
-                Text("Ymin").padding()
-                Slider(value: $Ymin, in:-180...Ymax ,step:0.05)
+                Text("YCenter").padding()
+                Slider(value: $YCenter, in:-180...180 ,step:0.05)
             }
             HStack{
-                Text("Ymax").padding()
-                Slider(value: $Ymax, in:Ymin...180 ,step:0.05)
+                Text("YRange").padding()
+                Slider(value: $YRange, in:0...360 ,step:0.05)
             }.sheet(isPresented: $isSheet) {
                 ListView(manager: manager)
             }
+            
             
             Button("Auto") {
                 Xmin = manager.minlatitude
@@ -96,7 +105,37 @@ struct Graf:View {
             
                 
         }
+        .onChange(of: XCenter) { _ in // XCenter が変わったら実行
+            Magnify(XCenter: XCenter, XRange: XRange, YCenter: YCenter, YRange: YRange, Xmin: &Xmin, Xmax: &Xmax, Ymin: &Ymin, Ymax: &Ymax)
+        }
+        .onChange(of: XRange) { _ in // XCenter が変わったら実行
+            Magnify(XCenter: XCenter, XRange: XRange, YCenter: YCenter, YRange: YRange, Xmin: &Xmin, Xmax: &Xmax, Ymin: &Ymin, Ymax: &Ymax)
+        }
+        .onChange(of: YCenter) { _ in // XCenter が変わったら実行
+            Magnify(XCenter: XCenter, XRange: XRange, YCenter: YCenter, YRange: YRange, Xmin: &Xmin, Xmax: &Xmax, Ymin: &Ymin, Ymax: &Ymax)
+        }
+        .onChange(of: YRange) { _ in // XCenter が変わったら実行
+            Magnify(XCenter: XCenter, XRange: XRange, YCenter: YCenter, YRange: YRange, Xmin: &Xmin, Xmax: &Xmax, Ymin: &Ymin, Ymax: &Ymax)
+        }
     }
+    
+    func Magnify(
+        XCenter: Double,
+        XRange: Double,
+        YCenter: Double,
+        YRange: Double,
+        Xmin: inout Double, // ⭐ inout を使用して参照渡しにする
+        Xmax: inout Double, // ⭐ inout を使用
+        Ymin: inout Double,
+        Ymax: inout Double
+    ) {
+        // Xmin, Xmax, Ymin, Ymax を直接更新できる
+        Xmin = XCenter - (XRange / 2) // 中心と範囲から最小値を計算
+        Xmax = XCenter + (XRange / 2) // 中心と範囲から最大値を計算
+        Ymin = YCenter - (YRange / 2)
+        Ymax = YCenter + (YRange / 2)
+    }
+    
 }
 
 
@@ -104,3 +143,6 @@ struct Graf:View {
     //ListView()
     Graf()
 }
+
+
+
