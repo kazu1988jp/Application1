@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Charts
+import math_h
 
 struct ListView: View {
     
@@ -18,7 +19,7 @@ struct ListView: View {
             
             List {
                 
-                ForEach(manager.PointdataRecord) { entry in
+                ForEach(manager.locationHistory) { entry in
                     HStack {
                         // entry.longitude と entry.latitude を直接参照
                         Text("経度: \(entry.longitude, specifier: "%.6f")")
@@ -50,10 +51,10 @@ struct Graf:View {
         
         
         VStack{
-            Chart(manager.PointdataRecord) {
+            Chart(manager.locationHistory) {dataPoint in
                 PointMark(
-                    x: .value("緯度", $0.latitude),
-                    y: .value("経度", $0.longitude)
+                    x: .value("緯度", dataPoint.latitude),
+                    y: .value("経度", dataPoint.longitude)
                 )
                 
             }
@@ -67,7 +68,7 @@ struct Graf:View {
             }
             HStack{
                 Text("XRange").padding()
-                Slider(value: $XRange, in:0...180 ,step:0.1)
+                Slider(value: $XRange, in:0...2.25 ,step:0.1)
             }
             HStack{
                 Text("YCenter").padding()
@@ -75,17 +76,20 @@ struct Graf:View {
             }
             HStack{
                 Text("YRange").padding()
-                Slider(value: $YRange, in:0...360 ,step:0.05)
+                Slider(value: $YRange, in:0...2.55 ,step:0.05)
             }.sheet(isPresented: $isSheet) {
                 ListView(manager: manager)
             }
             
             
             Button("Auto") {
-                Xmin = manager.minlatitude
-                Xmax = manager.maxlatitude
-                Ymin = manager.minlongitude
-                Ymax = manager.maxlongitude
+                XCenter = (manager.maxLatitude + manager.minLatitude) / 2
+                XRange = manager.maxLatitude - manager.minLatitude
+                YCenter = (manager.maxLongitude + manager.minLongitude) / 2
+                YRange = manager.maxLongitude - manager.minLongitude
+                
+                // updateMagnifyRange を呼び出す
+                self.Magnify()
             }
             .accentColor(Color.white)
             .padding([.leading, .trailing], 20)
@@ -105,38 +109,21 @@ struct Graf:View {
             
                 
         }
-        .onChange(of: XCenter) { _ in // XCenter が変わったら実行
-            Magnify(XCenter: XCenter, XRange: XRange, YCenter: YCenter, YRange: YRange, Xmin: &Xmin, Xmax: &Xmax, Ymin: &Ymin, Ymax: &Ymax)
+        .onChange(of: [XCenter, XRange, YCenter, YRange]) { _ in // XCenter が変わったら実行
+            Magnify()
         }
-        .onChange(of: XRange) { _ in // XCenter が変わったら実行
-            Magnify(XCenter: XCenter, XRange: XRange, YCenter: YCenter, YRange: YRange, Xmin: &Xmin, Xmax: &Xmax, Ymin: &Ymin, Ymax: &Ymax)
-        }
-        .onChange(of: YCenter) { _ in // XCenter が変わったら実行
-            Magnify(XCenter: XCenter, XRange: XRange, YCenter: YCenter, YRange: YRange, Xmin: &Xmin, Xmax: &Xmax, Ymin: &Ymin, Ymax: &Ymax)
-        }
-        .onChange(of: YRange) { _ in // XCenter が変わったら実行
-            Magnify(XCenter: XCenter, XRange: XRange, YCenter: YCenter, YRange: YRange, Xmin: &Xmin, Xmax: &Xmax, Ymin: &Ymin, Ymax: &Ymax)
+
+    }
+    
+    private func Magnify() {
+        Xmin = XCenter - (pow(10,XRange) / 2)
+            Xmax = XCenter + (pow(10,XRange) / 2)
+            Ymin = YCenter - (pow(10,YRange) / 2)
+            Ymax = YCenter + (pow(10,YRange) / 2)
         }
     }
     
-    func Magnify(
-        XCenter: Double,
-        XRange: Double,
-        YCenter: Double,
-        YRange: Double,
-        Xmin: inout Double, // ⭐ inout を使用して参照渡しにする
-        Xmax: inout Double, // ⭐ inout を使用
-        Ymin: inout Double,
-        Ymax: inout Double
-    ) {
-        // Xmin, Xmax, Ymin, Ymax を直接更新できる
-        Xmin = XCenter - (XRange / 2) // 中心と範囲から最小値を計算
-        Xmax = XCenter + (XRange / 2) // 中心と範囲から最大値を計算
-        Ymin = YCenter - (YRange / 2)
-        Ymax = YCenter + (YRange / 2)
-    }
-    
-}
+
 
 
 #Preview {
